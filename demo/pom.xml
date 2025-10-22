@@ -86,12 +86,6 @@
 			</exclusions>
 		</dependency>
 
-		<!-- PostgreSQL (sẽ dùng ở Chặng 1) -->
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
