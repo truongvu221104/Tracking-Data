@@ -28,6 +28,8 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<lombok.version>1.18.34</lombok.version> <!-- Java 21 OK -->
+		<mssql.jdbc.version>12.8.1.jre11</mssql.jdbc.version> <!-- gợi ý rõ version -->
 	</properties>
 	<dependencies>
 		<dependency>
@@ -43,16 +45,22 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<!-- SQL Server JDBC (chỉ định version rõ ràng) -->
 		<dependency>
 			<groupId>com.microsoft.sqlserver</groupId>
 			<artifactId>mssql-jdbc</artifactId>
+			<version>${mssql.jdbc.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!-- Lombok: có version + scope provided -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<version>${lombok.version}</version>
+			<scope>provided</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -63,6 +71,7 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<!-- OpenAPI / Swagger UI -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
@@ -70,7 +79,7 @@
 			<version>2.6.0</version>
 		</dependency>
 
-		<!-- Dùng Log4j2 thay Logback mặc định -->
+		<!-- Log4j2 (đã đúng) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>
@@ -85,23 +94,28 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
 	</dependencies>
 
 	<build>
 		<plugins>
+			<!-- Compiler plugin: khai báo version + AP Lombok có VERSION -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
 				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -116,5 +130,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
