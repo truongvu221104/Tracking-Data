@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(reg -> reg
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
+                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html","/api/auth/verify"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -41,18 +41,24 @@ public class SecurityConfig {
                 .build();
     }
 
-    @Bean PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-    @Bean AuthenticationManager authenticationManager() throws Exception {
+    @Bean
+    AuthenticationManager authenticationManager() throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
-    /** (tuỳ chọn) CORS local FE */
+    /**
+     * (tuỳ chọn) CORS local FE
+     */
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         var c = new CorsConfiguration();
         c.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:4200"));
-        c.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        c.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         c.setAllowedHeaders(List.of("*"));
         c.setAllowCredentials(true);
         var s = new UrlBasedCorsConfigurationSource();
