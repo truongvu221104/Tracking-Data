@@ -1,17 +1,41 @@
-<Configuration status="WARN">
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="60">
+    <Properties>
+        <!-- thư mục log có thể override bằng ENV LOG_DIR -->
+        <Property name="LOG_DIR">${sys:LOG_DIR:-logs}</Property>
+        <Property name="PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId}] %logger{36} - %msg%n</Property>
+    </Properties>
+
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level [%t] %logger{36} - %msg%n"/>
+            <PatternLayout pattern="${PATTERN}"/>
         </Console>
+
+        <!-- Rolling file theo ngày & dung lượng -->
+        <RollingFile name="AppFile" fileName="${LOG_DIR}/app.log"
+                     filePattern="${LOG_DIR}/app-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
     </Appenders>
 
     <Loggers>
-        <!-- Log app của bạn mức debug, các lib khác mức info -->
-        <Logger name="com.example" level="debug" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
+        <!-- giảm rác Hibernate -->
+        <Logger name="org.hibernate.SQL" level="info"/>
+        <Logger name="org.hibernate.type.descriptor.sql" level="warn"/>
+        <Logger name="org.springframework.security" level="info"/>
+        <Logger name="org.springframework.web" level="info"/>
+        <Logger name="com.example" level="debug"/>
+
         <Root level="info">
             <AppenderRef ref="Console"/>
+            <AppenderRef ref="AppFile"/>
+            <!-- <AppenderRef ref="JsonFile"/> -->
         </Root>
     </Loggers>
 </Configuration>
