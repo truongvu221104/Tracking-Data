@@ -25,7 +25,7 @@ public class ProductService {
     }
 
     public Product create(ProductCreateRequest req){
-        if (repo.existsBySku(req.getSku())) throw new IllegalArgumentException("SKU đã tồn tại");
+        if (repo.existsBySku(req.getSku())) throw new IllegalArgumentException("Mã sản phẩm đã tồn tại");
         var now = Instant.now();
         var p = Product.builder()
                 .sku(req.getSku()).name(req.getName()).description(req.getDescription())

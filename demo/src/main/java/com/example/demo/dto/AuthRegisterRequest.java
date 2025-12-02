@@ -19,4 +19,10 @@ public class AuthRegisterRequest {
     @NotBlank
     @Size(min = 6, max = 64)
     private String password;
+    @NotBlank @Size(min=6, max=64)
+    private String confirmPassword;
+    @AssertTrue(message = "Mật khẩu xác nhận không khớp")
+    public boolean isPasswordConfirmed() {
+        return password != null && password.equals(confirmPassword);
+    }
 }

@@ -20,19 +20,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+
+        // 1) Bỏ qua preflight CORS
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         String auth = request.getHeader("Authorization");
-        if (auth != null && auth.startsWith("Bearer ")) {
+        if (auth != null && auth.startsWith("Bearer ")
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
             String token = auth.substring(7);
             try {
-                String username = jwtUtil.getSubject(token);
+                String username = jwtUtil.getSubject(token); // sẽ ném JwtException nếu token sai/hết hạn
                 var user = uds.loadUserByUsername(username);
                 var authToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-            } catch (Exception ignored) {
-                // token lỗi → bỏ qua, để Security chặn ở layer tiếp theo
-            }
+            } catch (Exception ignored) { /* bỏ qua */ }
         }
         chain.doFilter(request, response);
     }
 }
+
 

@@ -11,7 +11,8 @@ import java.util.Date;
 import java.util.Map;
 
 @Component
-public class JwtUtil {
+public class
+JwtUtil {
 
     private final SecretKey key;
     private final long expirationMs;
@@ -27,14 +28,22 @@ public class JwtUtil {
 
     public String generate(String subject, Map<String, Object> claims) {
         long now = System.currentTimeMillis();
-        return Jwts.builder()
-                .subject(subject)
-                .claims(claims)
+
+        var builder = Jwts.builder();
+
+        // Cách 1: set claims từng cái để không reset các registered claims:
+        if (claims != null) {
+            claims.forEach(builder::claim); // roles, uid, emailVerified, ...
+        }
+
+        return builder
+                .subject(subject)                  // username
                 .issuedAt(new Date(now))
                 .expiration(new Date(now + expirationMs))
                 .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }
+
 
     public String getSubject(String token) {
         return Jwts.parser()

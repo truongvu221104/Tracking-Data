@@ -1,35 +1,102 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Layout, Menu, Button } from "antd";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Link,
+  Outlet,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
-function App() {
-  const [count, setCount] = useState(0)
+import AuthProvider, { useAuth } from "./auth/AuthContext"; 
+import ProtectedRoute from "./components/ProtectedRoute";
+
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Products from "./pages/Products";
+import Customers from "./pages/Customers";
+import PurchaseCreate from "./pages/PurchaseCreate";
+import SalesCreate from "./pages/SalesCreate";
+import InventoryLedger from "./pages/InventoryLedger";
+import OAuth2Callback from "./pages/OAuth2Callback";
+
+const { Header, Content } = Layout;
+
+const AppShell = () => {
+  const { hasRole, profile, setToken } = useAuth() || {};
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const items = [
+    { key: "/products", label: <Link to="/products">Sản phẩm</Link> },
+    ...(hasRole && hasRole("ADMIN")
+      ? [
+        { key: "/customers", label: <Link to="/customers">Khách hàng</Link> },
+        { key: "/purchase/create", label: <Link to="/purchase/create">Tạo sản phẩm mới</Link> },
+        { key: "/sales/create", label: <Link to="/sales/create">Tạo đơn bán hàng</Link> },
+        { key: "/inventory-ledger", label: <Link to="/inventory-ledger">Sổ kho</Link> },
+      ]
+      : []),
+  ];
+
+  const activeKey =
+    items.find((i) => location.pathname.startsWith(i.key))?.key || "";
+
+  const onLogout = () => {
+    localStorage.removeItem("accessToken");
+    setToken?.(null);
+    navigate("/login", { replace: true }); 
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Layout style={{ minHeight: "100vh" }}>
+      <Header style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <div style={{ color: "#fff", fontWeight: 700 }}>Trường Vũ</div>
+        <Menu
+          theme="dark"
+          mode="horizontal"
+          selectable
+          selectedKeys={[activeKey]}
+          items={items}
+        />
+        <div style={{ marginLeft: "auto", color: "#fff" }}>
+          {profile?.username}
+        </div>
+        <Button style={{ marginLeft: 12 }} onClick={onLogout}>
+          Đăng xuất
+        </Button>
+      </Header>
+      <Content style={{ padding: 24 }}>
+        <Outlet />
+      </Content>
+    </Layout>
+  );
+};
 
-export default App
+const router = createBrowserRouter([
+  { path: "/login", element: <Login /> },
+  { path: "/oauth2/callback", element: <OAuth2Callback /> },
+  { path: "/register", element: <Register /> },
+  {
+    path: "/",
+    element: (
+      <ProtectedRoute>
+        <AppShell />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Navigate to="/products" replace /> },
+      { path: "products", element: <Products /> },
+      { path: "customers", element: <Customers /> },
+      { path: "purchase/create", element: <PurchaseCreate /> },
+      { path: "sales/create", element: <SalesCreate /> },
+      { path: "inventory-ledger", element: <InventoryLedger /> },
+    ],
+  },
+  { path: "*", element: <Navigate to="/products" replace /> },
+]);
+
+export default function App() {
+  return <RouterProvider router={router} />;
+}

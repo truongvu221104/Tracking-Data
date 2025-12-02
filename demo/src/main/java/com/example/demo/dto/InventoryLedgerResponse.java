@@ -11,23 +11,19 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventoryLedgerCreateRequest {
-    @NotNull
+
+public class InventoryLedgerResponse {
+    private Long id;
+
     private Long productId;
-    @NotBlank
-    @Size(max = 16)
-    private String refType; // PURCHASE|SALE
-    @NotNull
+    private String productSku;
+    private String productName;
+
+    private String refType;     // PURCHASE | SALE
     private Long refId;
-    @NotNull
-    private Integer qtyDelta; // + nhập, - bán
-    @NotNull
-    @DecimalMin("0.00")
+    private Integer qtyDelta;
     private BigDecimal unitCost;
-    @NotNull
-    @DecimalMin("0.00")
     private BigDecimal costDelta;
     private String note;
-    @NotNull
     private Instant at;
 }
