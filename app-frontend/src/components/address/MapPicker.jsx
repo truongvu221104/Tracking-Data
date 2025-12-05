@@ -1,0 +1,98 @@
+import { useEffect, useState } from "react";
+import { Form, Input } from "antd";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
+import L from "leaflet";
+
+import "leaflet/dist/leaflet.css";
+
+// Fix icon mặc định của Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
+// Kho mặc định (origin) – em nhớ config giống bên BE
+const DEFAULT_CENTER = [21.0278, 105.8342]; // Hà Nội demo
+
+function ClickHandler({ onChange }) {
+  useMapEvents({
+    click(e) {
+      onChange(e.latlng);
+    },
+  });
+  return null;
+}
+
+function Recenter({ position }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!position) return;
+    // position is [lat, lng]
+    map.setView(position, map.getZoom());
+  }, [position, map]);
+  return null;
+}
+
+/**
+ * MapPicker
+ * - Hiển thị map
+ * - User click => cập nhật latitude/longitude vào form
+ * - Khi form đã có latitude/longitude (edit) => map nhảy tới đó
+ */
+export default function MapPicker({ form, onPositionChange }) {
+  const [position, setPosition] = useState(DEFAULT_CENTER);
+
+  // Watch latitude/longitude fields so MapPicker reacts to changes
+  const lat = Form.useWatch("latitude", form);
+  const lng = Form.useWatch("longitude", form);
+
+  useEffect(() => {
+    if (lat != null && lng != null) {
+      const p = [lat, lng];
+      setPosition(p);
+      if (typeof onPositionChange === "function") onPositionChange(p);
+    }
+  }, [lat, lng]);
+
+  const handleChange = (latlng) => {
+    const { lat, lng } = latlng;
+    const p = [lat, lng];
+    setPosition(p);
+    form.setFieldsValue({ latitude: lat, longitude: lng });
+    if (typeof onPositionChange === "function") onPositionChange(p);
+  };
+
+  return (
+    <>
+      {/* Map trên đầu cho dễ nhìn */}
+      <div style={{ height: 300, marginBottom: 8 }}>
+        <MapContainer
+          center={position}
+          zoom={13}
+          style={{ height: "100%", width: "100%" }}
+        >
+          <TileLayer
+            attribution="&copy; OpenStreetMap"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <ClickHandler onChange={handleChange} />
+          <Recenter position={position} />
+          <Marker position={position} />
+        </MapContainer>
+      </div>
+
+      {/* Lat/long hiển thị bên dưới map */}
+      <div style={{ display: "flex", gap: 8 }}>
+        <Form.Item label="Vĩ độ (lat)" name="latitude" style={{ flex: 1 }}>
+          <Input readOnly />
+        </Form.Item>
+        <Form.Item label="Kinh độ (lng)" name="longitude" style={{ flex: 1 }}>
+          <Input readOnly />
+        </Form.Item>
+      </div>
+    </>
+  );
+}

@@ -6,7 +6,7 @@ import { useState } from "react";
 export default function Register() {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const { message } = App.useApp();       // giống Login: lấy message từ Provider
+  const { message } = App.useApp();       
   const [loading, setLoading] = useState(false);
 
   const onFinish = async (values) => {
@@ -16,7 +16,7 @@ export default function Register() {
         username: values.username,
         email: values.email,
         password: values.password,
-        confirmPassword: values.confirm,   // đổi theo BE nếu cần
+        confirmPassword: values.confirm,   
       };
       await api.post("/auth/register", payload);
 

@@ -20,6 +20,8 @@ import PurchaseCreate from "./pages/PurchaseCreate";
 import SalesCreate from "./pages/SalesCreate";
 import InventoryLedger from "./pages/InventoryLedger";
 import OAuth2Callback from "./pages/OAuth2Callback";
+import CustomerProfile from "./pages/CustomerProfile";
+
 
 const { Header, Content } = Layout;
 
@@ -30,6 +32,7 @@ const AppShell = () => {
 
   const items = [
     { key: "/products", label: <Link to="/products">Sản phẩm</Link> },
+    { key: "/profile", label: <Link to="/profile">Hồ sơ</Link> },
     ...(hasRole && hasRole("ADMIN")
       ? [
         { key: "/customers", label: <Link to="/customers">Khách hàng</Link> },
@@ -88,6 +91,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/products" replace /> },
       { path: "products", element: <Products /> },
+      { path: "profile", element: <CustomerProfile /> },
       { path: "customers", element: <Customers /> },
       { path: "purchase/create", element: <PurchaseCreate /> },
       { path: "sales/create", element: <SalesCreate /> },

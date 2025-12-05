@@ -4,6 +4,7 @@ import { App as AntdApp, ConfigProvider } from "antd";
 import AuthProvider from "./auth/AuthContext";
 import App from "./App.jsx";
 import "antd/dist/reset.css";
+import "leaflet/dist/leaflet.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

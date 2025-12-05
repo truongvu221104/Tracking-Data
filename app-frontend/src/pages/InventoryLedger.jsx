@@ -47,8 +47,6 @@ export default function InventoryLedger() {
       };
       if (productId) params.productId = productId;
 
-      // Controller: @RequestMapping("/api/inventory-ledger")
-      // axios base có thể là "/api" nên endpoint ở đây là "/inventory-ledger"
       const { data } = await api.get("/inventory-ledger", { params });
       const content = Array.isArray(data?.content) ? data.content : [];
       setRows(content);

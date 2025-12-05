@@ -22,27 +22,24 @@ const toNumber = (x, def = 0) => {
 };
 
 export default function ProductForm({
-  mode = "create",              // "create" | "edit"
-  record = null,                // bản ghi cần sửa (khi edit)
-  onSuccess = () => {},         // callback khi submit OK
-  onCancel = null,              // optional: callback khi nhấn Hủy (dùng trong modal)
-  submitText,                   // override text nút lưu
-  hideChrome = false,           // nếu true: ẩn Card wrapper, chỉ render Form (dùng trong Modal)
+  mode = "create",              
+  record = null,                
+  onSuccess = () => {},         
+  onCancel = null,              
+  submitText,                   
+  hideChrome = false,          
 }) {
   const [form] = Form.useForm();
 
-  // AntD v5: ưu tiên message từ App context, fallback legacy
   let ctxMessage;
   try {
     const { message } = AntdApp.useApp();
     ctxMessage = message;
   } catch {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { default: legacyMessage } = require("antd/es/message");
     ctxMessage = legacyMessage;
   }
 
-  // Watch fields
   const watchMode = Form.useWatch("pricingMode", form) || PRICING.FIXED;
   const watchPrice = Form.useWatch("price", form) || 0;
   const watchMarkup = Form.useWatch("markupPercent", form) || 0;
@@ -70,7 +67,6 @@ export default function ProductForm({
     }
   }, [computedListPrice, watchMode, form]);
 
-  // Cảnh báo margin (chỉ hiển thị, không chặn submit — chặn đã có validator cross-field)
   const marginWarning = useMemo(() => {
     const cost = toNumber(watchPrice, 0);
     const sell =
@@ -211,10 +207,10 @@ export default function ProductForm({
     >
       <Space wrap>
         <Form.Item
-          label="Mã SKU"
+          label="Mã sản phẩm"
           name="sku"
           rules={[
-            { required: mode === "create", message: "Vui lòng nhập SKU" },
+            { required: mode === "create", message: "Vui lòng nhập mã sản phẩm" },
             { max: 64, message: "Tối đa 64 ký tự" },
           ]}
         >
@@ -274,7 +270,7 @@ export default function ProductForm({
 
         <Space wrap>
           <Form.Item
-            label="Giá cơ sở (price)"
+            label="Giá cơ sở "
             name="price"
             rules={[
               { required: true, message: "Vui lòng nhập giá cơ sở" },
@@ -299,7 +295,7 @@ export default function ProductForm({
           </Form.Item>
 
           <Form.Item
-            label="Giá bán hiện hành (listPrice)"
+            label="Giá bán hiện hành"
             name="listPrice"
             dependencies={["pricingMode", "price", "minMarginPercent"]}
             rules={[
