@@ -4,7 +4,6 @@ import { fetchProvinces, fetchDistricts } from "../../utils/locationApi";
 
 const { Option } = Select;
 
-// onDistrictSelected({ provinceId, provinceName, districtId, districtName })
 export default function LocationSelectors({ form, onDistrictSelected }) {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);

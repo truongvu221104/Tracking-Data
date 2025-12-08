@@ -29,8 +29,7 @@ public class CustomerService {
         var now = Instant.now();
         var c = Customer.builder()
                 .code(req.getCode()).name(req.getName())
-                .phone(req.getPhone()).email(req.getEmail())
-                .address(req.getAddress()).note(req.getNote())
+                .phone(req.getPhone())
                 .createdAt(now).updatedAt(now)
                 .build();
         return repo.save(c);
@@ -40,8 +39,6 @@ public class CustomerService {
         var c = get(id);
         c.setName(req.getName());
         c.setPhone(req.getPhone());
-        c.setEmail(req.getEmail());
-        c.setAddress(req.getAddress());
         c.setNote(req.getNote());
         c.setUpdatedAt(Instant.now());
         return repo.save(c);

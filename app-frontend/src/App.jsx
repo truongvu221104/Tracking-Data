@@ -9,7 +9,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 
-import AuthProvider, { useAuth } from "./auth/AuthContext"; 
+import AuthProvider, { useAuth } from "./auth/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import Login from "./pages/Login";
@@ -21,6 +21,8 @@ import SalesCreate from "./pages/SalesCreate";
 import InventoryLedger from "./pages/InventoryLedger";
 import OAuth2Callback from "./pages/OAuth2Callback";
 import CustomerProfile from "./pages/CustomerProfile";
+import ShopHome from "./pages/shop/ShopHome";
+import ProductDetail from "./pages/shop/ProductDetail";
 
 
 const { Header, Content } = Layout;
@@ -31,10 +33,11 @@ const AppShell = () => {
   const navigate = useNavigate();
 
   const items = [
-    { key: "/products", label: <Link to="/products">Sản phẩm</Link> },
+    { key: "/shop", label: <Link to="/shop">Cửa hàng</Link> },
     { key: "/profile", label: <Link to="/profile">Hồ sơ</Link> },
     ...(hasRole && hasRole("ADMIN")
       ? [
+        { key: "/products", label: <Link to="/products">Quản lý sản phẩm</Link> },
         { key: "/customers", label: <Link to="/customers">Khách hàng</Link> },
         { key: "/purchase/create", label: <Link to="/purchase/create">Tạo sản phẩm mới</Link> },
         { key: "/sales/create", label: <Link to="/sales/create">Tạo đơn bán hàng</Link> },
@@ -49,7 +52,7 @@ const AppShell = () => {
   const onLogout = () => {
     localStorage.removeItem("accessToken");
     setToken?.(null);
-    navigate("/login", { replace: true }); 
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -89,7 +92,9 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <Navigate to="/products" replace /> },
+      { index: true, element: <Navigate to="/shop" replace /> },
+      { path: "shop", element: <ShopHome /> },
+      { path: "shop/products/:id", element: <ProductDetail /> },
       { path: "products", element: <Products /> },
       { path: "profile", element: <CustomerProfile /> },
       { path: "customers", element: <Customers /> },

@@ -48,4 +48,7 @@ public class AppUser {
     private Instant createdAt;
 
     private Instant updatedAt;
+
+    @OneToOne(mappedBy = "user")
+    private Customer customer;
 }
