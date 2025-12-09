@@ -2,25 +2,31 @@ package com.example.demo.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
-@Table(name = "categories")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = "products")
+@Entity
+@Table(name = "categories")
 public class Category {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(nullable = false, length = 120, columnDefinition = "NVARCHAR(120)")
-    private String name;     // "Đồ uống", "Mì tôm", "Khuyến mãi hot"
+    private String name;
 
     @Column(length = 160)
-    private String slug;     // "do-uong", "mi-tom" (optional cho SEO / URL)
+    private String slug;
 
     @ManyToMany(mappedBy = "categories")
     @Builder.Default

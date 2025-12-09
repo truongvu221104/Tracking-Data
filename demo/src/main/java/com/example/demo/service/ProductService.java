@@ -29,10 +29,6 @@ public class ProductService {
         if (categoryId != null) {
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new RuntimeException("Category not found"));
-            if (keyword != null && !keyword.isBlank()) {
-                // nếu muốn kết hợp keyword + category thì phải custom query,
-                // còn tạm thời chỉ lọc theo category
-            }
             products = productRepository.findByCategoriesContainsAndStatus(category, "ACTIVE", pageable);
         } else if (keyword != null && !keyword.isBlank()) {
             products = productRepository.findByStatusAndNameContainingIgnoreCase("ACTIVE", keyword, pageable);

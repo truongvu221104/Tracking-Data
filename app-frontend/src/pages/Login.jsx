@@ -7,6 +7,7 @@ import { useState } from "react";
 import googleLogo from "../assets/google.svg";
 import fbLogo from "../assets/facebook.svg";
 
+
 export default function Login() {
   const { message } = App.useApp();
   const { setToken } = useAuth();
@@ -22,7 +23,7 @@ export default function Login() {
       setToken(data.accessToken);
       localStorage.setItem("accessToken", data.accessToken);
       message.success("Đăng nhập thành công");
-      navigate("/products", { replace: true });
+      navigate("/shop", { replace: true });
     } catch (e) {
       const status = e?.response?.status;
       const resMsg = e?.response?.data?.message;

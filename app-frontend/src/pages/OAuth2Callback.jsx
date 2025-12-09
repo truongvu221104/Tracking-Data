@@ -22,7 +22,7 @@ export default function OAuth2Callback() {
       setToken(token);
       localStorage.setItem("accessToken", token);
       message.success("Đăng nhập thành công");
-      navigate("/products", { replace: true });
+      navigate("/shop", { replace: true });
     } else {
       message.error("Không nhận được token từ server");
       navigate("/login", { replace: true });
