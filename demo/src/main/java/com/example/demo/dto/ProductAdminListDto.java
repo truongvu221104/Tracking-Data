@@ -1,14 +1,20 @@
 package com.example.demo.dto;
 
+import lombok.*;
 import java.math.BigDecimal;
 
-public record ProductAdminListDto(
-        Long id,
-        String sku,
-        String name,
-        Integer stockOnHand,
-        Integer stockMin,
-        BigDecimal listPrice,
-        String status
-) {}
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ProductAdminListDto {
 
+    private Long id;
+    private String sku;
+    private String name;
+    private Integer stockOnHand;
+    private Integer stockMin;
+    private BigDecimal displayPrice;
+    private String status;
+}

@@ -45,7 +45,10 @@ public class SecurityConfig {
                                 "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                                 "/api/auth/verify",
                                 // cho phép các endpoint OAuth2 public
-                                "/oauth2/**", "/login/oauth2/**"
+                                "/oauth2/**", "/login/oauth2/**",
+                                "/products/**",
+                                "/uploads/**",
+                                "/ws/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

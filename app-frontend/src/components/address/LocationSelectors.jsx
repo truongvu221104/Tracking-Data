@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
-import { Form, Select, message } from "antd";
+import { Form, Select, App } from "antd";
 import { fetchProvinces, fetchDistricts } from "../../utils/locationApi";
 
 const { Option } = Select;
 
 export default function LocationSelectors({ form, onDistrictSelected }) {
+  const { message } = App.useApp();
+
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [loadingProvince, setLoadingProvince] = useState(false);
   const [loadingDistrict, setLoadingDistrict] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState(null);
+
+  const provinceCode = Form.useWatch("provinceCode", form);
+  const districtCode = Form.useWatch("districtCode", form);
 
   useEffect(() => {
     const loadProvinces = async () => {
@@ -27,28 +32,13 @@ export default function LocationSelectors({ form, onDistrictSelected }) {
     loadProvinces();
   }, []);
 
-  const handleProvinceChange = async (provinceId) => {
-    form.setFieldsValue({ districtCode: undefined });
-    setDistricts([]);
-
-    const province = provinces.find((p) => p.province_id === provinceId) || null;
-    setSelectedProvince(province);
-
-    if (!provinceId) return;
-
-    setLoadingDistrict(true);
-    try {
-      const data = await fetchDistricts(provinceId);
-      setDistricts(data);
-    } catch (e) {
-      console.error(e);
-      message.error("Không tải được danh sách quận/huyện");
-    } finally {
-      setLoadingDistrict(false);
-    }
+  const handleProvinceChange = (provinceId) => {
+    form.setFieldsValue({ provinceCode: provinceId, districtCode: undefined });
   };
 
   const handleDistrictChange = (districtId) => {
+    form.setFieldsValue({ districtCode: districtId });
+
     if (!districtId || !selectedProvince) return;
 
     const district =
@@ -63,6 +53,39 @@ export default function LocationSelectors({ form, onDistrictSelected }) {
       });
     }
   };
+
+  // 🧠 Khi provinceCode trên form thay đổi (ví dụ: do setFieldsValue khi edit)
+  useEffect(() => {
+    if (!provinceCode) {
+      setSelectedProvince(null);
+      setDistricts([]);
+      return;
+    }
+
+    if (!provinces.length) return; // đợi provinces load xong
+
+    const province =
+      provinces.find((p) => p.province_id === provinceCode) || null;
+    setSelectedProvince(province);
+
+    if (!province) return;
+
+    const loadDistricts = async () => {
+      setLoadingDistrict(true);
+      try {
+        const data = await fetchDistricts(provinceCode);
+        setDistricts(data);
+      } catch (e) {
+        console.error(e);
+        message.error("Không tải được danh sách quận/huyện");
+      } finally {
+        setLoadingDistrict(false);
+      }
+    };
+
+    loadDistricts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [provinceCode, provinces]);
 
   return (
     <>

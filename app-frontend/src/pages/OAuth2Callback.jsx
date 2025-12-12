@@ -12,7 +12,7 @@ export default function OAuth2Callback() {
   const handledRef = useRef(false);
 
   useEffect(() => {
-     if (handledRef.current) return;  // nếu đã xử lý, thoát
+     if (handledRef.current) return;
     handledRef.current = true;
 
     const params = new URLSearchParams(search);

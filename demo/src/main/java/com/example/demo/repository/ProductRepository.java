@@ -18,4 +18,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // (tuỳ chọn) tìm theo name chứa từ khoá
     Page<Product> findByStatusAndNameContainingIgnoreCase(String status, String keyword, Pageable pageable);
+
+    Page<Product> findByCategoriesContainsAndStatusAndNameContainingIgnoreCase(Category category, String status, String name, Pageable pageable);
 }

@@ -1,37 +1,58 @@
 import { useEffect } from "react";
-import { Form, Input, Button, Card, Row, Col, message } from "antd";
+import { Form, Input, Button, Card, Row, Col, App } from "antd";
 import api from "../api/axios";
 import AddressSection from "../components/address/AddressSection";
 
 export default function CustomerProfile() {
+  const { message } = App.useApp();
   const [form] = Form.useForm();
 
+  // ====== Load hồ sơ khách hàng ======
   useEffect(() => {
     const loadProfile = async () => {
       try {
         const { data } = await api.get("/me/customer");
         if (data) {
           form.setFieldsValue({
-            name: data.name,
-            phone: data.phone,
-            note: data.note,
+            name: data.name ?? "",
+            phone: data.phone ?? "",
+            note: data.note ?? "",
           });
         }
       } catch (e) {
-        console.log("Không load được hồ sơ khách hàng", e);
+        console.error("Không load được hồ sơ khách hàng", e);
+        const err =
+          e?.parsed?.message ||
+          e?.response?.data?.message ||
+          e?.message ||
+          "Không tải được hồ sơ khách hàng";
+        message.error(err);
       }
     };
 
     loadProfile();
-  }, [form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // ====== Lưu hồ sơ ======
   const onFinish = async (values) => {
     try {
-      await api.post("/me/customer", values);
+      const payload = {
+        name: values.name?.trim(),
+        phone: values.phone?.trim(),
+        note: values.note?.trim() || null,
+      };
+
+      await api.post("/me/customer", payload);
       message.success("Cập nhật hồ sơ khách hàng thành công");
     } catch (e) {
-      console.error(e);
-      message.error("Không cập nhật được hồ sơ khách hàng");
+      console.error("Cập nhật hồ sơ khách hàng lỗi", e);
+      const err =
+        e?.parsed?.message ||
+        e?.response?.data?.message ||
+        e?.message ||
+        "Không cập nhật được hồ sơ khách hàng";
+      message.error(err);
     }
   };
 
@@ -68,7 +89,10 @@ export default function CustomerProfile() {
             </Form.Item>
 
             <Form.Item name="note" label="Ghi chú">
-              <Input.TextArea rows={3} placeholder="VD: Giao giờ hành chính" />
+              <Input.TextArea
+                rows={3}
+                placeholder="VD: Giao giờ hành chính"
+              />
             </Form.Item>
 
             <Form.Item>

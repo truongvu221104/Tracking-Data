@@ -28,7 +28,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
         AppUser user = principal.getUser();
 
-        // Claims giống lúc bạn login username/password
         Map<String, Object> claims = new HashMap<>();
         claims.put("uid", user.getId());
         claims.put("roles", user.getRoles());
@@ -38,7 +37,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String jwt = jwtUtil.generate(user.getUsername(), claims);
 
         // Redirect về FE, gửi token qua query param
-        String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/oauth2/callback") // FE callback
+        String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/oauth2/callback")
                 .queryParam("token", jwt).build().toUriString();
 
         response.sendRedirect(redirectUrl);

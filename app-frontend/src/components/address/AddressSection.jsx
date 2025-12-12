@@ -8,9 +8,10 @@ import {
   Input,
   Checkbox,
   Space,
-  message,
   Typography,
   Divider,
+  Popconfirm,
+  App,
 } from "antd";
 import api from "../../api/axios";
 import LocationSelectors from "./LocationSelectors";
@@ -76,6 +77,8 @@ async function geocodeDistrict(provinceName, districtName) {
 }
 
 export default function AddressSection() {
+  const { message } = App.useApp(); // ✅ dùng context AntdApp
+
   const [addresses, setAddresses] = useState([]);
   const [loadingList, setLoadingList] = useState(false);
   const [form] = Form.useForm();
@@ -85,16 +88,21 @@ export default function AddressSection() {
   const [previewFee, setPreviewFee] = useState(null);
   const [previewDistance, setPreviewDistance] = useState(null);
   const [geocoding, setGeocoding] = useState(false);
-  const [markerPosition, setMarkerPosition] = useState(null);
 
+  // ========== LOAD DANH SÁCH ĐỊA CHỈ ==========
   const loadAddresses = async () => {
     setLoadingList(true);
     try {
       const res = await api.get("/me/addresses");
-      setAddresses(res.data || []);
+      setAddresses(Array.isArray(res.data) ? res.data : []);
     } catch (e) {
       console.error(e);
-      message.error("Không tải được danh sách địa chỉ");
+      const err =
+        e?.parsed?.message ||
+        e?.response?.data?.message ||
+        e?.message ||
+        "Không tải được danh sách địa chỉ";
+      message.error(err);
     } finally {
       setLoadingList(false);
     }
@@ -102,12 +110,14 @@ export default function AddressSection() {
 
   useEffect(() => {
     loadAddresses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ========== TÍNH PHÍ SHIP DEMO ==========
   const recomputePreviewFee = (pos) => {
-    // prefer explicit position (from map marker), fallback to form fields
     let lat = null;
     let lng = null;
+
     if (pos && Array.isArray(pos)) {
       [lat, lng] = pos;
     } else {
@@ -125,15 +135,16 @@ export default function AddressSection() {
     }
   };
 
+  // ========== THÊM MỚI ==========
   const startCreate = () => {
     setEditingId(null);
     form.resetFields();
     setPreviewDistance(null);
     setPreviewFee(null);
-    setMarkerPosition(null);
     setShowForm(true);
   };
 
+  // ========== EDIT ==========
   const handleEdit = (record) => {
     setEditingId(record.id);
     form.setFieldsValue({
@@ -145,32 +156,46 @@ export default function AddressSection() {
       latitude: record.latitude,
       longitude: record.longitude,
     });
+
     if (record.latitude != null && record.longitude != null) {
       const p = [record.latitude, record.longitude];
-      setMarkerPosition(p);
       recomputePreviewFee(p);
     } else {
       recomputePreviewFee();
     }
+
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
+  // ========== XOÁ ==========
+  const handleDelete = async (record) => {
+    if (record.isDefault) {
+      message.warning(
+        "Không thể xoá địa chỉ mặc định. Hãy đặt địa chỉ khác làm mặc định trước."
+      );
+      return;
+    }
+
     try {
-      await api.delete(`/me/addresses/${id}`);
+      await api.delete(`/me/addresses/${record.id}`);
       message.success("Đã xoá địa chỉ");
-      loadAddresses();
+      await loadAddresses();
     } catch (e) {
       console.error(e);
-      message.error("Không xoá được địa chỉ");
+      const err =
+        e?.parsed?.message ||
+        e?.response?.data?.message ||
+        e?.message ||
+        "Không xoá được địa chỉ";
+      message.error(err);
     }
   };
 
+  // ========== CHỌN QUẬN/HUYỆN (để geocode) ==========
   const handleDistrictSelected = async ({
     provinceName,
     districtName,
   }) => {
-    // chọn xong huyện -> map nhảy tới tâm huyện
     setGeocoding(true);
     try {
       const result = await geocodeDistrict(provinceName, districtName);
@@ -179,7 +204,6 @@ export default function AddressSection() {
           latitude: result.lat,
           longitude: result.lng,
         });
-        // MapPicker will receive the form change and notify back via onPositionChange.
         recomputePreviewFee([result.lat, result.lng]);
       } else {
         message.warning("Không tìm được toạ độ cho huyện này");
@@ -192,6 +216,7 @@ export default function AddressSection() {
     }
   };
 
+  // ========== SUBMIT FORM ==========
   const onFinish = async (values) => {
     const payload = {
       label: values.label || "",
@@ -217,10 +242,15 @@ export default function AddressSection() {
       setPreviewDistance(null);
       setPreviewFee(null);
       setShowForm(false);
-      loadAddresses();
+      await loadAddresses();
     } catch (e) {
       console.error(e);
-      message.error("Không lưu được địa chỉ");
+      const err =
+        e?.parsed?.message ||
+        e?.response?.data?.message ||
+        e?.message ||
+        "Không lưu được địa chỉ";
+      message.error(err);
     }
   };
 
@@ -258,9 +288,14 @@ export default function AddressSection() {
           <Button size="small" onClick={() => handleEdit(record)}>
             Sửa
           </Button>
-          <Button size="small" danger onClick={() => handleDelete(record.id)}>
-            Xoá
-          </Button>
+          <Popconfirm
+            title="Xoá địa chỉ này?"
+            onConfirm={() => handleDelete(record)}
+          >
+            <Button size="small" danger>
+              Xoá
+            </Button>
+          </Popconfirm>
         </Space>
       ),
     },
@@ -328,13 +363,12 @@ export default function AddressSection() {
             <Divider style={{ margin: "8px 0 16px" }} />
 
             {/* Map trên cùng */}
-              <MapPicker
-                form={form}
-                onPositionChange={(pos) => {
-                  setMarkerPosition(pos);
-                  recomputePreviewFee(pos);
-                }}
-              />
+            <MapPicker
+              form={form}
+              onPositionChange={(pos) => {
+                recomputePreviewFee(pos);
+              }}
+            />
 
             {/* Tỉnh / Huyện */}
             <LocationSelectors
@@ -358,7 +392,7 @@ export default function AddressSection() {
               <Input placeholder="Ví dụ: Nhà riêng, Cơ quan..." />
             </Form.Item>
 
-            {previewFee != null && (
+            {previewFee != null && previewDistance != null && (
               <div style={{ marginBottom: 16 }}>
                 <Text strong>Khoảng cách tới kho: </Text>
                 <Text>
